@@ -1,0 +1,25 @@
+name: Selenium Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Node.js (Latest Stable Version)
+      uses: actions/setup-node@v2
+      with:
+        node-version: 'latest'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run Selenium tests
+      run: npm run test src/tests/component/App.test.js
+      # Replace "npm test" with the command you use to run your Selenium tests, if different

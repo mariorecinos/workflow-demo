@@ -15,7 +15,7 @@ describe('My Selenium Tests', function () {
         await driver.quit()
     })
 
-    test.only(' should verify h1 text', async function() {
+    test(' should verify h1 text', async function() {
         // we no longer have to provide our setup code as this will now run beforeAll
         //  test thanks to the beforeAll method
         // const driver = await new selenium.Builder().forBrowser('chrome').build();

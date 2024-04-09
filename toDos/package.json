@@ -16,6 +16,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:components": "jest src/tests/component/App.test.js",
     "test:selenium": "jest src/tests/e2e/selenium-todos.test.js",
     "eject": "react-scripts eject"
   },

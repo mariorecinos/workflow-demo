@@ -1,0 +1,36 @@
+name: Selenium Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Node.js (Latest Stable Version)
+      uses: actions/setup-node@v2
+      with:
+        node-version: 'latest'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Start Application
+      run: npm start &
+      # The '&' at the end runs the command in the background, allowing the workflow to proceed to the next steps without waiting for the command to finish.
+
+    - name: Setup ChromeDriver
+      uses: nanasess/setup-chromedriver@master
+      # Make sure the ChromeDriver version is compatible with the Chrome version installed on the runner
+
+    - name: Wait for Application to Launch
+      run: sleep 10
+
+    - name: Run Selenium tests
+      run: npm run test src/tests/e2e/selenium-todos.test.js
+      # Replace "npm test" with the command you use to run your Selenium tests, if different
