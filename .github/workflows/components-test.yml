@@ -18,7 +18,7 @@ jobs:
         cache: 'npm'
 
     - name: Install dependencies
-      run: npm install &
+      run: npm install
 
     - name: Run Component Tests
       run: npm run test src/tests/component/App.test.js
