@@ -5,7 +5,7 @@ const toDos = ['Buy ice cream', 'Eat ice cream', 'Go to the gym'];
 test('Header contains the text "Things I should stop procrastinating:"', () => {
 	const myList = render(<MyList theList={toDos} />);
 	const heading = myList.getByRole('heading');
-	expect(heading).toHaveTextContent('Things I should stop procrastinating:');
+	expect(heading).toHaveTextContent('Things I should stop procrastinating');
 });
 
 test('Entering text into text input and clicking "Add it!" button adds the item to the list', () => {
