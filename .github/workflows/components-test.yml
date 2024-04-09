@@ -1,4 +1,4 @@
-name: Selenium Tests
+name: Component Tests
 
 on:
   push:
@@ -20,6 +20,6 @@ jobs:
     - name: Install dependencies
       run: npm install &
 
-    - name: Run Selenium tests
+    - name: Run Component Tests
       run: npm run test src/tests/component/App.test.js
       # Replace "npm test" with the command you use to run your Selenium tests, if different
