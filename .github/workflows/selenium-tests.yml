@@ -29,7 +29,7 @@ jobs:
       # Make sure the ChromeDriver version is compatible with the Chrome version installed on the runner
 
     - name: Wait for Application to Launch
-      run: sleep 10
+      run: sleep 20
 
     - name: Run Selenium tests
       run: npm run test src/tests/e2e/selenium-todos.test.js
