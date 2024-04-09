@@ -21,7 +21,7 @@ jobs:
       run: npm install
 
     - name: Start Application
-      run: npm start &
+      run: npm start
       # The '&' at the end runs the command in the background, allowing the workflow to proceed to the next steps without waiting for the command to finish.
 
     - name: Setup ChromeDriver
