@@ -24,12 +24,12 @@ jobs:
     #   run: npm start &
     #   # The '&' at the end runs the command in the background, allowing the workflow to proceed to the next steps without waiting for the command to finish.
 
-    # - name: Setup ChromeDriver
-    #   uses: nanasess/setup-chromedriver@master
-    #   # Make sure the ChromeDriver version is compatible with the Chrome version installed on the runner
+    - name: Setup ChromeDriver
+      uses: nanasess/setup-chromedriver@master
+      # Make sure the ChromeDriver version is compatible with the Chrome version installed on the runner
 
-    # - name: Wait for Application to Launch
-    #   run: sleep 10
+    - name: Wait for Application to Launch
+      run: sleep 10
 
     - name: Run Selenium tests
       run: npm run test src/tests/e2e/selenium-todos.test.js
