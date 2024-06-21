@@ -1,694 +1,132 @@
-# Adding Selenium to our To-Do Tests
+# Introduction to GitHub Actions
 
-## Clone This Repository Into Your Virtual Machine
+GitHub Actions is a feature provided by GitHub that allows you to automate, customize, and execute software development workflows right in your repository. With GitHub Actions, you can create workflows that build, test, package, release, or deploy any code project on GitHub.
 
-1. Open your terminal.
+GitHub Actions provides you with a virtual machine (VM) to run your workflows. When you specify a runs-on attribute in your workflow, GitHub sets up a virtual environment based on your selection. For example, runs-on: ubuntu-latest tells GitHub to provide an Ubuntu-based virtual machine.
 
-2. To access the mef directory, please navigate to it from your home directory using the command `cd ~/mef`
+## How Does It Work?
 
-3. clone this repository into your virtual machine using the command:
+- Provisioning: When a workflow is triggered, GitHub creates a new VM instance with the specified environment.
+- Setup: The VM is preconfigured with necessary tools and software. For example, if you choose ubuntu-latest, it includes common tools and software needed for development.
+- Execution: Your workflow steps are executed in this VM. Each step in the workflow runs in the context of this isolated environment.
+- Cleanup: Once the workflow completes, the VM is destroyed, ensuring no leftover files or data.
 
-  ```bash
-  git clone git@git.generalassemb.ly:ModernEngineering/selenium-todos-walkthrough.git`
-  ```
-4. After cloning the repository cd into the selenium-todos-walkthrough directory using the command
-`cd selenium-todos-walkthrough`
+This means you don't have to worry about setting up and maintaining a physical machine for running your tests or builds. GitHub takes care of everything, providing a clean slate for each workflow run.
 
-5. Now cd into the toDos directory where our react starter code is located using the command `cd toDos`
+## What is a Workflow?
 
-6. Now open in vs code with the command `code .`
+A workflow is an automated process that you define in your GitHub repository. It's made up of one or more jobs that can run on different machines, such as a Linux server or a Windows machine.
 
-7. Make sure to run the command to install the dependencies from our package.json with the command `npm install`
+## Understanding the Workflow File
 
-8. Go head and start your react application running the command `npm start`
+The workflow file is a YAML file that lives in your `.github/workflows directory`. YAML is a human-readable data format that is easy to write and understand. Let's walk through an example workflow file named `components-test.yml`.
 
+## Example Workflow: components-test.yml
 
-## Objectives
+Here's what the file looks like:
 
-* **Install Selenium WebDriver:**
-  Learn how to install and configure Selenium WebDriver for use with the Firefox browser in a JavaScript environment.
+```yaml
+name: Component Tests
 
-* **Control Browsers Remotely with JavaScript using Selenium:**
-  Understand how to use Selenium to programmatically control browser actions with JavaScript, including launching and navigating the Firefox browser.
+on:
+  push:
+    branches: [ solution ]
 
-* **Load Webpages:**
-  Automate the process of opening and loading webpages, with a focus on loading the local to-do application at `http://localhost:3000`.
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-* **Find HTML Elements on the Page:**
-  Learn to locate various HTML elements on the to-do application's webpage using Selenium’s WebDriver.
+    steps:
+    - uses: actions/checkout@v2
 
-* **Click on HTML Elements:**
-  Master clicking on buttons like "Add it!" and "Finished the list!" through Selenium-driven browser interactions.
+    - name: Setup Node.js (Latest Stable Version)
+      uses: actions/setup-node@v2
+      with:
+        node-version: 'lts/*'
+        cache: 'npm'
 
-* **Insert Text into HTML Input Elements:**
-  Practice inserting text into input fields, simulating user inputs in the to-do application.
+    - name: Install dependencies
+      run: npm install
 
-* **Verify Text Content of HTML Elements:**
-  Develop techniques to verify the text content of HTML elements, ensuring the application behaves as expected, such as checking the H1 tag and validating list updates.
-
-  ## User Stories
-
-  We will now proceed to use selenium to complete e2e tests of these user stories for our toDos react application.
-
-1. **Verify Header Text:**
-   - The H1 tag should have the text "Things I should stop procrastinating:".
-
-2. **Add Item to List:**
-   - The user enters the text "Eat more ice cream" into the text input and clicks the "Add it!" button. The last item in the list should now have the text "Eat more ice cream".
-
-3. **Clear the List:**
-   - The user clicks the "Finished the list!" button. The list should now be empty.
-
-
-## Installing Selenium
-
-Now install the `selenium-webdriver` package for this project, so we can use it in our tests using the command:
-
-```bash
-npm install selenium-webdriver
+    - name: Run Component Tests
+      run: npm run test src/tests/component/App.test.js
 ```
 
-Inside of your src directory you will see a directory for tests inside that directory is a folder for component test with the App.test.js which is running our jest component test.  In order to keep our tests organized we will create a seperate folder for our selenium tests inside a folder called e2e.
+Let's break down each part:
 
-`src/tests/e2e`
+## Name
 
-Inside the e2e folder create a file called `selenium-todos.test.js` which is the file we will be using to write our selenium tests.
+This is the name of the workflow. It helps you identify this workflow in the GitHub Actions interface.
 
-
-## Step 1: Import Selenium WebDriver
-
-In this step, we import the `selenium-webdriver` package into our test script. The `selenium-webdriver` package allows us to programmatically control web browsers and perform actions such as opening web pages, interacting with web elements, and verifying web page content.
-
-By requiring the `selenium-webdriver` package, we make its functionality available for use in our test script. This step is essential as it sets up the foundation for automating interactions with our web application.
-
-```javascript
-const selenium = require('selenium-webdriver');
+```yaml
+name: Component Tests
 ```
 
-In this line of code, we import the selenium-webdriver library and assign it to the variable selenium. This variable will be used throughout our test script to interact with the Selenium WebDriver.
+## Triggers: on
 
+This section defines when the workflow should run. In this case, the workflow runs every time there is a push (a code change) to the `solution` branch.
 
-## Test 1: Verify Header Text
-
-In this test, we aim to verify that the header text of our web application matches the expected text. We use Selenium WebDriver to automate this verification.
-
-### Test Description
-
-1. We begin by describing the test suite using `describe('My Selenium Tests', function () { ... })`. This test suite encompasses all the Selenium tests for our application.
-
-**e2e/selenium-todos.test.js**
-```javascript
-const selenium = require('selenium-webdriver');
-
-describe('My Selenium Tests', function () {
-
-
-})
-
+```yaml
+on:
+  push:
+    branches: [ solution ]
 ```
 
-2. Inside the test suite, we define our first test case using `test(' should verify h1 text', async function() { ... })`. This test case specifically focuses on verifying the header text.
+## Jobs
 
-**e2e/selenium-todos.test.js**
-```javascript
-const selenium = require('selenium-webdriver');
+A workflow can have multiple jobs that run different tasks. Each job can have multiple steps. Let's look at the `build` job:
 
-describe('My Selenium Tests', function () {
-  test(' should verify h1 text', async function() {
+**Job: build**
 
-    })
+runs-on: ubuntu-latest: This specifies the type of machine the job should run on. Here, it uses the latest version of Ubuntu, a popular Linux distribution.
 
-})
-
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
 ```
 
-3. Within the test case:
-   - We create a Selenium WebDriver instance for the Chrome browser using `const driver = await new selenium.Builder().forBrowser('chrome').build();`. This sets up the WebDriver to control the browser.
-   - We maximize the browser window to ensure consistent visibility using `await driver.manage().window().maximize();`.
+## Steps
 
-   **e2e/selenium-todos.test.js**
-```javascript
-const selenium = require('selenium-webdriver');
+Each job contains steps that define the actions to perform.
 
-describe('My Selenium Tests', function () {
-  test(' should verify h1 text', async function() {
-        const driver = await new selenium.Builder().forBrowser('firefox').build();
-        await driver.manage().window().maximize();
-    })
+**Step 1: Checkout Code**
 
-})
+uses: actions/checkout@v2: This step uses a predefined action to check out (download) your repository's code so the job can work with it.
 
+```yaml
+steps:
+- uses: actions/checkout@v2
 ```
 
-4. We navigate to our web application by opening its URL with `await driver.get('http://localhost:3000/');`.
+**Step 2: Setup Node.js**
 
-**e2e/selenium-todos.test.js**
-```javascript
-const selenium = require('selenium-webdriver');
+- name: Setup Node.js (Latest Stable Version): This is a descriptive name for the step.
+- uses: actions/setup-node@v2: This step uses another predefined action to set up Node.js, a JavaScript runtime.
+- with:: This provides additional settings:
+- node-version: 'lts/*': This specifies that it should install the latest stable version of Node.js.
+- cache: 'npm': This enables caching for npm (Node Package Manager) to speed up the process.
 
-describe('My Selenium Tests', function () {
-  test(' should verify h1 text', async function() {
-        const driver = await new selenium.Builder().forBrowser('firefox').build();
-        await driver.manage().window().maximize();
-        await driver.get('http://localhost:3000/');
-    })
+**Step 3: Install Dependencies**
 
-})
+- name: Install dependencies: This is another descriptive name.
+- run: npm install: This runs the npm install command to install the necessary packages required by your project.
 
+```yaml
+- name: Install dependencies
+  run: npm install
 ```
 
-5. We locate the `<h1>` element of the web page using `const h1Element = await driver.findElement(selenium.By.css('h1'));`.
+**Step 4: Run Component Tests**
 
-**e2e/selenium-todos.test.js**
-```javascript
-const selenium = require('selenium-webdriver');
+- name: Run Component Tests: A descriptive name for the step.
+- run: npm run test src/tests/component/App.test.js: This runs a command to execute your component tests. It specifically runs the test file App.test.js located in the src/tests/component directory.
 
-describe('My Selenium Tests', function () {
-  test(' should verify h1 text', async function() {
-        const driver = await new selenium.Builder().forBrowser('firefox').build();
-        await driver.manage().window().maximize();
-        await driver.get('http://localhost:3000/');
-        h1Element = await driver.findElement(selenium.By.css('h1'));
-    })
-
-})
+```yaml
+- name: Run Component Tests
+  run: npm run test src/tests/component/App.test.js
 ```
 
-6. We retrieve the actual text of the `<h1>` element using `const actualText = await h1Element.getText();`.
+## Observe In Action
 
-**e2e/selenium-todos.test.js**
-```javascript
-const selenium = require('selenium-webdriver');
-
-describe('My Selenium Tests', function () {
-  test(' should verify h1 text', async function() {
-        const driver = await new selenium.Builder().forBrowser('firefox').build();
-        await driver.manage().window().maximize();
-        await driver.get('http://localhost:3000/');
-        h1Element = await driver.findElement(selenium.By.css('h1'));
-        const actualText = await h1Element.getText();
-    })
-
-})
-```
-
-7. We define the expected text that the header should have, which is 'Things I should stop procrastinating:'.
-
-**e2e/selenium-todos.test.js**
-```javascript
-const selenium = require('selenium-webdriver');
-
-describe('My Selenium Tests', function () {
-  test(' should verify h1 text', async function() {
-        const driver = await new selenium.Builder().forBrowser('firefox').build();
-        await driver.manage().window().maximize();
-        await driver.get('http://localhost:3000/');
-        h1Element = await driver.findElement(selenium.By.css('h1'));
-        const actualText = await h1Element.getText();
-        const expectedText = 'Things I should stop procrastinating:';
-
-    })
-
-})
-```
-
-8. We use Jest's `expect` and `toBe` matcher to compare the actual text with the expected text, ensuring they match as follows:
-
-
-**e2e/selenium-todos.test.js**
-```javascript
-const selenium = require('selenium-webdriver');
-
-describe('My Selenium Tests', function () {
-  test(' should verify h1 text', async function() {
-        const driver = await new selenium.Builder().forBrowser('firefox').build();
-        await driver.manage().window().maximize();
-        await driver.get('http://localhost:3000/');
-        h1Element = await driver.findElement(selenium.By.css('h1'));
-        const actualText = await h1Element.getText();
-        const expectedText = 'Things I should stop procrastinating:';
-
-        // Using Jest's expect and toBe matcher
-        expect(actualText).toBe(expectedText);
-        // We will close our driver session
-        await driver.quit()
-    })
-
-})
-```
-
-9. Run the selenium test.  Only run our selenium-todos.test.js file enter the command:
-
-```bash
-npm test -- --testPathPattern=selenium-todos.test.js
-```
-
-You should now see that your test has passed.
-
-
-## Setup and Teardown for Selenium Tests
-
-In order to run Selenium WebDriver tests, it's essential to set up and tear down the WebDriver instance correctly. This ensures that the browser is launched before running the tests and is properly closed afterward. The `beforeAll` and `afterAll` functions provided by Jest are used for these purposes.
-
-### Setting up Selenium WebDriver
-
-Before running any Selenium tests, we need to set up the WebDriver instance, which includes configuring the browser to use and opening the web application. Here's how this setup is accomplished step by step:
-
-beforeAll(async function () {: This code block uses beforeAll, a Jest function that runs before all the tests in the test suite. It's where we set up the WebDriver instance.
-
-```javascript
-describe('My Selenium Tests', function () {
-
-    let driver;
-
-    beforeAll(async function () {
-        driver = await new selenium.Builder().forBrowser('chrome').build();
-        await driver.manage().window().maximize();
-        await driver.get('http://localhost:3000/');
-    });
-
-})
-```
-
-driver = await new selenium.Builder().forBrowser('chrome').build();: We create a new WebDriver instance for the Chrome browser using Selenium's Builder class. This is where we specify the browser to be used.
-
-await driver.manage().window().maximize();: We maximize the browser window to ensure that the web application is displayed clearly during testing.
-
-await driver.get('http://localhost:3000/');: We navigate the browser to the URL of our web application (http://localhost:3000/ in this case).
-
-### Tearing Down Selenium WebDriver
-
-After all the tests have been executed, it's crucial to properly close the WebDriver instance to free up resources and terminate the browser. Here's the teardown process:
-
-```javascript
-afterAll(async function () {
-    // Close the WebDriver instance and the associated browser
-    await driver.quit();
-})
-```
-
-afterAll(async function () {: This code block uses afterAll, a Jest function that runs after all the tests in the test suite. It's where we tear down the WebDriver instance.
-
-await driver.quit();: We use the quit() method to gracefully close the WebDriver instance and the associated browser.
-
-By following this setup and teardown pattern, you ensure that your Selenium tests start with a clean browser environment and properly release resources when they finish.
-
-**Updated Tests**
-```javascript
-const selenium = require('selenium-webdriver');
-
-
-describe('My Selenium Tests', function () {
-
-    let driver;
-
-    beforeAll(async function () {
-        driver = await new selenium.Builder().forBrowser('firefox').build();
-        await driver.manage().window().maximize();
-        await driver.get('http://localhost:3000/');
-    });
-
-    afterAll(async function () {
-        await driver.quit()
-    })
-
-    test.only(' should verify h1 text', async function() {
-        // we no longer have to provide our setup code as this will now run beforeAll
-        //  test thanks to the beforeAll method making additional test less repetitive meaning DRY
-        // const driver = await new selenium.Builder().forBrowser('chrome').build();
-        // await driver.manage().window().maximize();
-        // await driver.get('http://localhost:3000/');
-        const h1Element = await driver.findElement(selenium.By.css('h1'));
-        const actualText = await h1Element.getText();
-        const expectedText = 'Things I should stop procrastinating:';
-
-        // Using Jest's expect and toBe matcher
-        expect(actualText).toBe(expectedText);
-    })
-
-})
-
-```
-
-Now run your test again
-
-```bash
-npm test -- --testPathPattern=selenium-todos.test.js
-```
-
-Test should all pass
-
-## Test Case: Add Item to List
-
-In this test case, we will verify the functionality of adding an item to the to-do list.
-
-1. **Find the Text Input Element:**
-   - The test locates the text input element on the web page using its placeholder attribute, which has the value "Type an item here".
-
-
-**e2e/selenium-todos.test.js**
-
-```javascript
-
- test('Add Item to List', async () => {
-        // Find the text input element
-        const inputElement = await driver.findElement(selenium.By.css('[placeholder="Type an item here"]'));
-
-      });
-```
-
-2. **Enter Text Character by Character with Delay:**
-
-- To simulate a more user-friendly interaction, the test enters the text "Eat more ice cream" into the input field one character at a time. It adds a delay of 50 milliseconds between each character to visualize the typing effect.
-
-**e2e/selenium-todos.test.js**
-
-```javascript
-
- test('Add Item to List', async () => {
-        // Find the text input element
-        const inputElement = await driver.findElement(selenium.By.css('[placeholder="Type an item here"]'));
-
-        // Enter "Eat more ice cream" into the text input one character at a time with a delay so we can see our text
-        for (const char of 'Eat more ice cream') {
-            await inputElement.sendKeys(char);
-            await new Promise(resolve => setTimeout(resolve, 50)); // Add a delay of 50 milliseconds
-        }
-
-      });
-```
-
-**e2e/selenium-todos.test.js**
-
-3. **Press the Return Key:**
-
-After entering the text, the test presses the Return key on the keyboard to trigger the addition of the item to the list.
-
-```javascript
-
- test('Add Item to List', async () => {
-        // Find the text input element
-        const inputElement = await driver.findElement(selenium.By.css('[placeholder="Type an item here"]'));
-
-        // Enter "Eat more ice cream" into the text input one character at a time with a delay so we can see our text
-        for (const char of 'Eat more ice cream') {
-            await inputElement.sendKeys(char);
-            await new Promise(resolve => setTimeout(resolve, 50)); // Add a delay of 50 milliseconds
-        }
-
-        // after we have entered our text now lets go ahead and hit the return key
-        await inputElement.sendKeys(selenium.Key.RETURN);
-      });
-```
-
-Find List Items:
-
-The test selects all list items on the web page by targeting the <li> elements. These elements represent the to-do list items.
-
-```javascript
-const lastItemText = await listItems[listItems.length - 1].getText();
-```
-
-**e2e/selenium-todos.test.js**
-
-```javascript
-
- test('Add Item to List', async () => {
-        // Find the text input element
-        const inputElement = await driver.findElement(selenium.By.css('[placeholder="Type an item here"]'));
-
-        // Enter "Eat more ice cream" into the text input one character at a time with a delay so we can see our text
-        for (const char of 'Eat more ice cream') {
-            await inputElement.sendKeys(char);
-            await new Promise(resolve => setTimeout(resolve, 50)); // Add a delay of 50 milliseconds
-        }
-
-        // after we have entered our text now lets go ahead and hit the return key
-        await inputElement.sendKeys(selenium.Key.RETURN);
-
-        //  without a delay
-        // await inputElement.sendKeys('Eat more ice cream', selenium.Key.RETURN);
-
-        // lets select our list items by targeting li css element
-        const listItems = await driver.findElements(selenium.By.css('li'));
-      });
-```
-
-Get the Text of the Last Item:
-
-The test retrieves the text of the last item in the list. This item should contain the text "Eat more ice cream" if the addition was successful.
-
-```javascript
-expect(lastItemText).toBe('Eat more ice cream');
-```
-
-**e2e/selenium-todos.test.js**
-
-```javascript
-
- test('Add Item to List', async () => {
-        // Find the text input element
-        const inputElement = await driver.findElement(selenium.By.css('[placeholder="Type an item here"]'));
-
-        // Enter "Eat more ice cream" into the text input one character at a time with a delay so we can see our text
-        for (const char of 'Eat more ice cream') {
-            await inputElement.sendKeys(char);
-            await new Promise(resolve => setTimeout(resolve, 50)); // Add a delay of 50 milliseconds
-        }
-
-        // after we have entered our text now lets go ahead and hit the return key
-        await inputElement.sendKeys(selenium.Key.RETURN);
-
-        //  without a delay
-        // await inputElement.sendKeys('Eat more ice cream', selenium.Key.RETURN);
-
-        // lets select our list items by targeting li css element
-        const listItems = await driver.findElements(selenium.By.css('li'));
-
-        // Get the text of the last item
-         const lastItemText = await listItems[listItems.length - 1].getText();
-
-         // Verify that the last item has the text "Eat more ice cream"
-         expect(lastItemText).toBe('Eat more ice cream');
-      });
-```
-
-e2e/selenium-todos.test.js
-
-```javascript
-const selenium = require('selenium-webdriver');
-
-
-describe('My Selenium Tests', function () {
-
-    let driver;
-
-    beforeAll(async function () {
-        driver = await new selenium.Builder().forBrowser('chrome').build();
-        await driver.manage().window().maximize();
-        await driver.get('http://localhost:3000/');
-    });
-
-    afterAll(async function () {
-        await driver.quit()
-    })
-
-    test.only(' should verify h1 text', async function() {
-        // we no longer have to provide our setup code as this will now run beforeAll
-        //  test thanks to the beforeAll method
-        // const driver = await new selenium.Builder().forBrowser('chrome').build();
-        // await driver.manage().window().maximize();
-        // await driver.get('http://localhost:3000/');
-        const h1Element = await driver.findElement(selenium.By.css('h1'));
-        const actualText = await h1Element.getText();
-        const expectedText = 'Things I should stop procrastinating:';
-
-        // Using Jest's expect and toBe matcher
-        expect(actualText).toBe(expectedText);
-    })
-
-    test('Add Item to List', async () => {
-        // Find the text input element
-        const inputElement = await driver.findElement(selenium.By.css('[placeholder="Type an item here"]'));
-
-        // Enter "Eat more ice cream" into the text input one character at a time with a delay so we can see our text
-        for (const char of 'Eat more ice cream') {
-            await inputElement.sendKeys(char);
-            await new Promise(resolve => setTimeout(resolve, 50)); // Add a delay of 50 milliseconds
-        }
-
-        // after we have entered our text now lets go ahead and hit the return key
-        await inputElement.sendKeys(selenium.Key.RETURN);
-
-        //  without a delay
-        // await inputElement.sendKeys('Eat more ice cream', selenium.Key.RETURN);
-
-        // lets select our list items by targeting li css element
-        const listItems = await driver.findElements(selenium.By.css('li'));
-
-        // Get the text of the last item
-         const lastItemText = await listItems[listItems.length - 1].getText();
-
-         // Verify that the last item has the text "Eat more ice cream"
-         expect(lastItemText).toBe('Eat more ice cream');
-      });
-})
-```
-
-## Test Case: Clicking on "Finished the list!" will delete all elements in the list
-
-In this test case, we will verify the functionality of clicking the "Finished the list!" button, which should remove all items from the to-do list.
-
-Locate and Click the "Finished the List!" Button:
-
-The test locates the "Finished the list!" button on the web page using an XPath expression and clicks it to initiate the list clearing process.
-
-```javascript
-const finishedButton = await driver.findElement(selenium.By.xpath('//button[normalize-space()="Finished the list!"]'));
-await finishedButton.click();
-```
-**e2e/selenium-todos.test.js**
-```javascript
- test('Clicking on "Finished the list!" will delete all elements in the list', async () => {
-
-        // Locate and click the "Finished the list!" button
-        const finishedButton = await driver.findElement(selenium.By.xpath('//button[normalize-space()="Finished the list!"]'));
-        await finishedButton.click();
-    });
-```
-
-Wait for List Update:
-
-To ensure that the list has been updated and all elements have been deleted, the test waits for a brief moment (you can use a wait if necessary) to allow the list to update.
-
-```javascript
-await driver.sleep(1000); // Wait for 1 second
-```
-
-**e2e/selenium-todos.test.js**
-```javascript
- test('Clicking on "Finished the list!" will delete all elements in the list', async () => {
-
-        // Locate and click the "Finished the list!" button
-        const finishedButton = await driver.findElement(selenium.By.xpath('//button[normalize-space()="Finished the list!"]'));
-        await finishedButton.click();
-
-        // Wait for a brief moment to allow the list to update (you can use a wait if necessary)
-        await driver.sleep(1000);
-
-        // Verify that all elements in the list are deleted
-        const listItems = await driver.findElements(selenium.By.css('li'));
-        expect(listItems.length).toBe(0);
-    });
-```
-
-Verify that All Elements in the List are Deleted:
-
-The test confirms the success of the operation by checking that there are no list items (<li>) remaining in the list.
-
-```javascript
-const listItems = await driver.findElements(selenium.By.css('li'));
-expect(listItems.length).toBe(0);
-```
-
-**e2e/selenium-todos.test.js**
-```javascript
- test('Clicking on "Finished the list!" will delete all elements in the list', async () => {
-
-        // Locate and click the "Finished the list!" button
-        const finishedButton = await driver.findElement(selenium.By.xpath('//button[normalize-space()="Finished the list!"]'));
-        await finishedButton.click();
-
-        // Wait for a brief moment to allow the list to update (you can use a wait if necessary)
-        await driver.sleep(1000);
-
-        // Verify that all elements in the list are deleted
-        const listItems = await driver.findElements(selenium.By.css('li'));
-        expect(listItems.length).toBe(0);
-    });
-```
-
-Now run your test again
-```javascript
-npm test -- --testPathPattern=selenium-todos.test.js
-```
-all test should now have pased
-
-
-final:
-
-**e2e/selenium-todos.test.js**
-```javascript
-const selenium = require('selenium-webdriver');
-
-
-describe('My Selenium Tests', function () {
-
-    let driver;
-
-    beforeAll(async function () {
-        driver = await new selenium.Builder().forBrowser('chrome').build();
-        await driver.manage().window().maximize();
-        await driver.get('http://localhost:3000/');
-    });
-
-    afterAll(async function () {
-        await driver.quit()
-    })
-
-    test.only(' should verify h1 text', async function() {
-        // we no longer have to provide our setup code as this will now run beforeAll
-        //  test thanks to the beforeAll method
-        // const driver = await new selenium.Builder().forBrowser('chrome').build();
-        // await driver.manage().window().maximize();
-        // await driver.get('http://localhost:3000/');
-        const h1Element = await driver.findElement(selenium.By.css('h1'));
-        const actualText = await h1Element.getText();
-        const expectedText = 'Things I should stop procrastinating:';
-
-        // Using Jest's expect and toBe matcher
-        expect(actualText).toBe(expectedText);
-    })
-
-    test('Add Item to List', async () => {
-        // Find the text input element
-        const inputElement = await driver.findElement(selenium.By.css('[placeholder="Type an item here"]'));
-
-        // Enter "Eat more ice cream" into the text input one character at a time with a delay so we can see our text
-        for (const char of 'Eat more ice cream') {
-            await inputElement.sendKeys(char);
-            await new Promise(resolve => setTimeout(resolve, 50)); // Add a delay of 50 milliseconds
-        }
-
-        // after we have entered our text now lets go ahead and hit the return key
-        await inputElement.sendKeys(selenium.Key.RETURN);
-
-        //  without a delay
-        // await inputElement.sendKeys('Eat more ice cream', selenium.Key.RETURN);
-
-        // lets select our list items by targeting li css element
-        const listItems = await driver.findElements(selenium.By.css('li'));
-
-        // Get the text of the last item
-         const lastItemText = await listItems[listItems.length - 1].getText();
-
-         // Verify that the last item has the text "Eat more ice cream"
-         expect(lastItemText).toBe('Eat more ice cream');
-      });
-
-      test('Clicking on "Finished the list!" will delete all elements in the list', async () => {
-        // Navigate to the application
-        await driver.get('http://localhost:3000/');
-
-        // Locate and click the "Finished the list!" button
-        const finishedButton = await driver.findElement(selenium.By.xpath('//button[normalize-space()="Finished the list!"]'));
-        await finishedButton.click();
-
-        // Wait for a brief moment to allow the list to update (you can use a wait if necessary)
-        await driver.sleep(1000);
-
-        // Verify that all elements in the list are deleted
-        const listItems = await driver.findElements(selenium.By.css('li'));
-        expect(listItems.length).toBe(0);
-    });
-})
+- Now whenever you make a push to your solution branch it will trigger the workflow which you can view in the actions tab of your repository.
