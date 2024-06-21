@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -22,4 +22,4 @@ jobs:
 
     - name: Run Component Tests
       run: npm run test src/tests/component/App.test.js
-      # Replace "npm test" with the command you use to run your Selenium tests, if different
+     
